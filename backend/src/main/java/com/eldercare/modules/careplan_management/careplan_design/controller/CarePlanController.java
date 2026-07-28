@@ -91,7 +91,8 @@ public class CarePlanController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<PagedResponse<List<SearchCarePlanResponseDTO>>> searchCarePlan(
+    public ResponseEntity<PagedResponse<ListCarePlanResponseDTO>> searchCarePlan(
+            @RequestParam(required = false) String residentName,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) CarePlanStatusEnum status,
             @RequestParam(required = false) Boolean significantChangeFlag,
@@ -99,13 +100,14 @@ public class CarePlanController {
             @RequestParam(defaultValue = "20") int size) {
         SearchCarePlanRequestDTO requestDTO = new SearchCarePlanRequestDTO();
 
+        requestDTO.residentName = residentName;
         requestDTO.keyword = keyword;
         requestDTO.status = status;
         requestDTO.significantChangeFlag = significantChangeFlag;
         requestDTO.page = page;
         requestDTO.size = size;
 
-        PagedResponse<List<SearchCarePlanResponseDTO>> pagenatedResponse = carePlanService.searchCarePlan(requestDTO);
+        PagedResponse<ListCarePlanResponseDTO> pagenatedResponse = carePlanService.searchCarePlan(requestDTO);
         return ResponseEntity.ok(pagenatedResponse);
     }
 

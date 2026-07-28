@@ -16,9 +16,15 @@ import type {
   ResidentInfo,
 } from "@/services/care-plan/care-plan-types";
 import { formatOffsetDateTimeToDate } from "../utils/time-utils";
+import {
+  getCarePlanLOCTierStyle,
+  getCarePlanStatusStyle,
+} from "../utils/style";
+import { Loader2 } from "lucide-react";
 
 type CarePlanTableProps = {
   carePlans: CarePlan[];
+  isLoading: boolean;
 };
 
 export default function CarePlanTable(props: CarePlanTableProps) {
@@ -31,9 +37,16 @@ export default function CarePlanTable(props: CarePlanTableProps) {
     );
   };
 
+  if (props.isLoading) {
+    return (
+      <div className="flex justify-center items-center h-80">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
   return (
-    <div className="mt-[16px]">
-      <Table className=" border-2 border-gray-300 rounded-lg p-4">
+    <div className="mt-12">
+      <Table className=" border-2 border-gray-l00 rounded-lg p-4">
         {/* <TableCaption>A list of your recent invoices.</TableCaption> */}
         <TableHeader className="bg-gray-300 ">
           <TableRow className="font-bold font text-lg ">
@@ -59,7 +72,7 @@ export default function CarePlanTable(props: CarePlanTableProps) {
             <TableHead className="text-left">Action</TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody>
+        <TableBody className="bg-white">
           {props.carePlans.map((carePlan) => (
             <TableRow key={carePlan.id}>
               <TableCell className="font-medium">
@@ -67,21 +80,16 @@ export default function CarePlanTable(props: CarePlanTableProps) {
               </TableCell>
 
               <TableCell className="text-left">
-                <Text>{carePlan.locTier}</Text>
+                <Flag
+                  title={`Tier ${carePlan.LOCTier}`}
+                  className={`rounded-full ${getCarePlanLOCTierStyle(carePlan).className}`}
+                ></Flag>
               </TableCell>
 
               <TableCell className="text-left">
                 <Flag
                   title={carePlan.status}
-                  className={`rounded-full ${
-                    carePlan.status === "DRAFT"
-                      ? "bg-gray-300 text-gray-700 border-gray-400"
-                      : carePlan.status === "ACTIVE"
-                        ? "bg-green-300 text-green-700 border-green-400"
-                        : carePlan.status === "ARCHIVED"
-                          ? "bg-blue-300 text-blue-700 border-blue-400"
-                          : "bg-red-300 text-red-700 border-red-400"
-                  }`}
+                  className={`rounded-full ${getCarePlanStatusStyle(carePlan).className}`}
                 />
               </TableCell>
 
@@ -92,7 +100,13 @@ export default function CarePlanTable(props: CarePlanTableProps) {
               </TableCell>
 
               <TableCell className="text-left">
-                <Text>
+                <Text
+                  className={
+                    carePlan.nextReviewDateTime === "Overdue"
+                      ? "text-blue-600 font-medium font-bold"
+                      : ""
+                  }
+                >
                   {formatOffsetDateTimeToDate(carePlan.nextReviewDateTime)}
                 </Text>
               </TableCell>

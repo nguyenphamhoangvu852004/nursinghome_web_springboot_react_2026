@@ -31,7 +31,7 @@ public interface ICarePlanService {
 
     public GetCarePlanDetailResponseDTO getCarePlanDetail(GetCarePlanDetailRequestDTO requestDTO);
 
-    public PagedResponse<List<SearchCarePlanResponseDTO>> searchCarePlan(SearchCarePlanRequestDTO requestDTO);
+    public PagedResponse<ListCarePlanResponseDTO> searchCarePlan(SearchCarePlanRequestDTO requestDTO);
 
     public CreateCarePlanResponseDTO createCarePlan(CreateCarePlanRequestDTO requestDTO, String purpose);
 

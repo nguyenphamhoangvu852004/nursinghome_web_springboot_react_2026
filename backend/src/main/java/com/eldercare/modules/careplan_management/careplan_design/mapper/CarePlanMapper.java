@@ -25,7 +25,7 @@ public class CarePlanMapper {
                 BedEntity bed = schema.getResident().getBed();
                 newEntity.setResident(new CarePlanResidentInfoEntity(
                                 schema.getResident().getId().intValue(),
-                                schema.getResident().getLastName(),
+                                getResidentFullName(schema.getResident()),
                                 schema.getResident().getDateOfBirth(),
                                 bed != null && bed.getRoom() != null
                                                 ? bed.getRoom().getRoomNumber()
@@ -99,5 +99,29 @@ public class CarePlanMapper {
                 schema.setCreatedBy(user);
                 schema.setListCareGoal(goalSchemas);
                 return schema;
+        }
+
+        private static String getResidentFullName(ResidentEntity residentEntity) {
+                StringBuilder fullname = new StringBuilder();
+
+                if (residentEntity.getFirstName() != null) {
+                        fullname.append(residentEntity.getFirstName());
+                }
+
+                if (residentEntity.getMiddleName() != null) {
+                        if (!fullname.isEmpty()) {
+                                fullname.append(" ");
+                        }
+                        fullname.append(residentEntity.getMiddleName());
+                }
+
+                if (residentEntity.getLastName() != null) {
+                        if (!fullname.isEmpty()) {
+                                fullname.append(" ");
+                        }
+                        fullname.append(residentEntity.getLastName());
+                }
+
+                return fullname.toString();
         }
 }

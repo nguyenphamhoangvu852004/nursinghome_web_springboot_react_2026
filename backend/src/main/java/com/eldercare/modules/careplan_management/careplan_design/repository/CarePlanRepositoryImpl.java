@@ -16,6 +16,10 @@ import com.eldercare.modules.careplan_management.careplan_design.mapper.CarePlan
 import com.eldercare.modules.resident_intake.resident.repository.ResidentRepository;
 import com.eldercare.modules.resident_intake.resident_profile.ResidentEntity;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
+
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -38,6 +42,8 @@ import com.eldercare.modules.careplan_management.careplan_design.service.ICarePl
 import jakarta.transaction.Transactional;
 
 import static java.util.stream.Collectors.toList;
+
+import java.util.ArrayList;
 
 @Repository
 
@@ -257,7 +263,31 @@ public class CarePlanRepositoryImpl implements ICarePlanRepository {
         if (request.status != null) {
             spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), request.status.name()));
         }
+        if (request.residentName != null && !request.residentName.isBlank()) {
+            System.out.println("ENTER FILTER");
+            String[] keywords = request.residentName
+                    .trim()
+                    .toLowerCase()
+                    .split("\\s+");
 
+            spec = spec.and((root, query, cb) -> {
+                Join<CarePlanSchema, ResidentEntity> resident = root.join("resident");
+
+                List<Predicate> predicates = new ArrayList<>();
+
+                for (String keyword : keywords) {
+                    String pattern = "%" + keyword + "%";
+
+                    predicates.add(
+                            cb.or(
+                                    cb.like(cb.lower(resident.get("firstName")), pattern),
+                                    cb.like(cb.lower(cb.coalesce(resident.get("middleName"), "")), pattern),
+                                    cb.like(cb.lower(resident.get("lastName")), pattern)));
+                }
+
+                return cb.and(predicates.toArray(new Predicate[0]));
+            });
+        }
         if (request.significantChangeFlag != null) {
             spec = spec.and((root, query, cb) -> cb.equal(root.get("significantChangeFlag"),
                     request.significantChangeFlag));
@@ -282,13 +312,30 @@ public class CarePlanRepositoryImpl implements ICarePlanRepository {
 
         Specification<CarePlanSchema> spec = Specification.unrestricted();
 
-        // TODO:
-        // Search by resident name / resident id
-        // Waiting for Resident module
-        if (request.keyword != null && !request.keyword.isBlank()) {
-            // TODO
-        }
+        if (request.residentName != null && !request.residentName.isBlank()) {
+            String[] keywords = request.residentName
+                    .trim()
+                    .toLowerCase()
+                    .split("\\s+");
 
+            spec = spec.and((root, query, cb) -> {
+                Join<CarePlanSchema, ResidentEntity> resident = root.join("resident");
+
+                List<Predicate> predicates = new ArrayList<>();
+
+                for (String keyword : keywords) {
+                    String pattern = "%" + keyword + "%";
+
+                    predicates.add(
+                            cb.or(
+                                    cb.like(cb.lower(resident.get("firstName")), pattern),
+                                    cb.like(cb.lower(cb.coalesce(resident.get("middleName"), "")), pattern),
+                                    cb.like(cb.lower(resident.get("lastName")), pattern)));
+                }
+
+                return cb.and(predicates.toArray(new Predicate[0]));
+            });
+        }
         if (request.status != null) {
             spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), request.status.name()));
         }

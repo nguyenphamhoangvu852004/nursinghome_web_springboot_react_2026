@@ -14,16 +14,16 @@ export type CarePlanAuthor = {
 };
 export type CarePlan = {
   id: number;
-  locTier: number;
+  LOCTier: number;
   cycle: number;
 
   status:
-    | "DRAFT"
-    | "ACTIVE"
-    | "NEEDS_UPDATE"
-    | "REVIEW_DUE"
-    | "ARCHIVED"
-    | "PENDING_REVIEW";
+    | "Draft"
+    | "Active"
+    | "Need update"
+    | "Review due"
+    | "Archived"
+    | "Pending review";
 
   significantFlag: boolean;
   goalCount: number;

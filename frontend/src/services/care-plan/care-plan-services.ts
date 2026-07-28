@@ -45,3 +45,35 @@ export const approveCarePlan = async (
 
   return response.data.data;
 };
+
+export const searchCarePlans = async (
+  resident?: string,
+  status?:
+    | "Draft"
+    | "Active"
+    | "Need update"
+    | "Review due"
+    | "Archived"
+    | "Pending review"
+    | "All",
+): Promise<GetCarePlanListResponse> => {
+  if (status === "All") {
+    return getCarePlanList();
+  }
+
+  const params = new URLSearchParams();
+
+  if (resident) {
+    params.append("residentName", resident);
+  }
+
+  if (status) {
+    params.append("status", status.toUpperCase().replaceAll(" ", "_"));
+  }
+
+  const response = await apiClient.get<GetCarePlanListResponse>(
+    `/care-plans/search?${params.toString()}`,
+  );
+
+  return response.data;
+};

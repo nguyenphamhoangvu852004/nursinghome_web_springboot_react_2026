@@ -34,6 +34,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import com.eldercare.modules.careplan_management.careplan_design.dto.CarePlanStatusLabelFormat;
 import com.eldercare.modules.careplan_management.careplan_design.dto.activeCarePlanDTO.ActiveCarePlanRequestDTO;
 import com.eldercare.modules.careplan_management.careplan_design.dto.activeCarePlanDTO.ActiveCarePlanResponseDTO;
 import com.eldercare.modules.careplan_management.careplan_design.dto.discontinueCarePlanDTO.DiscontinueCarePlanRequestDTO;
@@ -65,7 +66,8 @@ public class CarePlanServiceImpl implements ICarePlanService {
                 // now hardcode DON id
                 carePlanEntity.approve("DON-001");
                 this.carePlanRepository.updateOne(carePlanEntity);
-                return new ActiveCarePlanResponseDTO(carePlanEntity.getId(), carePlanEntity.getStatus().toString(),
+                return new ActiveCarePlanResponseDTO(carePlanEntity.getId(),
+                                CarePlanStatusLabelFormat.getLabel(carePlanEntity),
                                 carePlanEntity.getUpdatedAt().toString());
         }
 
@@ -76,7 +78,7 @@ public class CarePlanServiceImpl implements ICarePlanService {
                 carePlanEntity.archive();
                 this.carePlanRepository.updateOne(carePlanEntity);
                 return new DiscontinueCarePlanResponseDTO(
-                                carePlanEntity.getId(), carePlanEntity.getStatus().toString(),
+                                carePlanEntity.getId(), CarePlanStatusLabelFormat.getLabel(carePlanEntity),
                                 carePlanEntity.getUpdatedAt().toString());
 
         }
@@ -119,14 +121,22 @@ public class CarePlanServiceImpl implements ICarePlanService {
                                 .map(entity -> {
                                         CarePlanOutput output = new CarePlanOutput();
                                         output.id = entity.getId();
-                                        output.status = entity.getStatus().name();
+                                        output.status = CarePlanStatusLabelFormat.getLabel(entity);
                                         output.significantFlag = entity.getSignificantFlag();
                                         output.lastReviewedBy = entity.getLastReviewBy() == null ? null
                                                         : entity.getLastReviewBy();
                                         output.lastReviewedDateTime = entity.getLastReviewDateTime() == null ? null
                                                         : entity.getLastReviewDateTime().toString();
-                                        output.nextReviewDateTime = entity.getNextReviewDateTime() == null ? null
-                                                        : entity.getNextReviewDateTime().toString();
+
+                                        OffsetDateTime nextReview = entity.getNextReviewDateTime();
+
+                                        output.nextReviewDateTime = nextReview == null
+                                                        ? "-"
+                                                        : nextReview.isBefore(OffsetDateTime.now())
+                                                                        ? "Overdue"
+                                                                        : nextReview.toLocalDate()
+                                                                                        .toString();
+
                                         output.cycle = 90;
                                         output.resident = new CarePlanOutput.CarePlanResidentOutput(
                                                         entity.getResident().getId(),
@@ -191,7 +201,7 @@ public class CarePlanServiceImpl implements ICarePlanService {
 
                 GetCarePlanDetailResponseDTO responseDTO = new GetCarePlanDetailResponseDTO();
                 responseDTO.id = carePlanEntity.getId();
-                responseDTO.status = carePlanEntity.getStatus().name();
+                responseDTO.status = CarePlanStatusLabelFormat.getLabel(carePlanEntity);
                 responseDTO.significantFlag = carePlanEntity.getSignificantFlag();
                 responseDTO.lastReviewedBy = carePlanEntity.getLastReviewBy() == null ? null
                                 : carePlanEntity.getLastReviewBy();
@@ -246,34 +256,144 @@ public class CarePlanServiceImpl implements ICarePlanService {
                 return responseDTO;
         }
 
+        // @Override
+        // public PagedResponse<List<SearchCarePlanResponseDTO>> searchCarePlan(
+        // SearchCarePlanRequestDTO requestDTO) {
+
+        // Page<CarePlanEntity> pageCarePlanEntity =
+        // carePlanRepository.searchPagination(requestDTO);
+
+        // List<SearchCarePlanResponseDTO> list = pageCarePlanEntity.getContent()
+        // .stream()
+        // .map(entity -> {
+        // SearchCarePlanResponseDTO dto = new SearchCarePlanResponseDTO();
+        // dto.id = entity.getId();
+        // dto.residentId = entity.getResident().getId();
+        // dto.residentName = entity.getResident().getFullname();
+        // dto.status = CarePlanStatusLabelFormat.getLabel(entity);
+        // dto.significantChangeFlag = entity.getSignificantFlag();
+        // dto.createdAt = entity.getCreatedAt() == null
+        // ? null
+        // : entity.getCreatedAt().toString();
+        // dto.updatedAt = entity.getUpdatedAt() == null
+        // ? null
+        // : entity.getUpdatedAt().toString();
+
+        // return dto;
+        // })
+        // .toList();
+
+        // return PagedResponse.of(
+        // list,
+        // HttpStatus.OK.value(),
+        // "Success",
+        // pageCarePlanEntity.getNumber(),
+        // pageCarePlanEntity.getTotalPages(),
+        // pageCarePlanEntity.getSize(),
+        // pageCarePlanEntity.getTotalElements());
+        // }
         @Override
-        public PagedResponse<List<SearchCarePlanResponseDTO>> searchCarePlan(
+        @Transactional
+        public PagedResponse<ListCarePlanResponseDTO> searchCarePlan(
                         SearchCarePlanRequestDTO requestDTO) {
 
                 Page<CarePlanEntity> pageCarePlanEntity = carePlanRepository.searchPagination(requestDTO);
 
-                List<SearchCarePlanResponseDTO> list = pageCarePlanEntity.getContent()
-                                .stream()
+                List<CarePlanEntity> listCarePlanEntity = pageCarePlanEntity.getContent();
+
+                List<Long> userIds = listCarePlanEntity.stream()
+                                .map(entity -> Long.valueOf(entity.getCreatedBy()))
+                                .distinct()
+                                .toList();
+
+                List<UserEntity> authors = carePlanRepository.getListUserByIDs(userIds);
+
+                Map<Long, UserEntity> authorMap = authors.stream()
+                                .collect(Collectors.toMap(
+                                                UserEntity::getId,
+                                                Function.identity()));
+
+                List<Long> residentIds = listCarePlanEntity.stream()
+                                .map(entity -> Long.valueOf(entity.getResident().getId()))
+                                .distinct()
+                                .toList();
+
+                Map<Long, Integer> locTierMap = carePlanRepository.getLOCTierFromResidentIds(residentIds);
+
+                List<CarePlanOutput> outputs = listCarePlanEntity.stream()
                                 .map(entity -> {
-                                        SearchCarePlanResponseDTO dto = new SearchCarePlanResponseDTO();
-                                        dto.id = entity.getId();
-                                        dto.residentId = entity.getResident().getId();
-                                        dto.residentName = entity.getResident().getFullname();
-                                        dto.status = entity.getStatus().name();
-                                        dto.significantChangeFlag = entity.getSignificantFlag();
-                                        dto.createdAt = entity.getCreatedAt() == null
+
+                                        CarePlanOutput output = new CarePlanOutput();
+
+                                        output.id = entity.getId();
+                                        output.status = CarePlanStatusLabelFormat.getLabel(entity);
+                                        output.significantFlag = entity.getSignificantFlag();
+
+                                        output.lastReviewedBy = entity.getLastReviewBy();
+
+                                        output.lastReviewedDateTime = entity.getLastReviewDateTime() == null
+                                                        ? null
+                                                        : entity.getLastReviewDateTime().toString();
+
+                                        OffsetDateTime nextReview = entity.getNextReviewDateTime();
+
+                                        output.nextReviewDateTime = nextReview == null
+                                                        ? "-"
+                                                        : nextReview.isBefore(OffsetDateTime.now())
+                                                                        ? "Overdue"
+                                                                        : nextReview.toLocalDate().toString();
+
+                                        output.cycle = 90;
+
+                                        output.resident = new CarePlanOutput.CarePlanResidentOutput(
+                                                        entity.getResident().getId(),
+                                                        entity.getResident().getFullname(),
+                                                        entity.getResident().getDob().toString());
+
+                                        if (entity.getResident().getRoom() == null
+                                                        || entity.getResident().getBed() == null) {
+
+                                                output.definition = new CarePlanOutput.CarePlanResidentDefinitionOutput(
+                                                                "", "");
+
+                                        } else {
+
+                                                output.definition = new CarePlanOutput.CarePlanResidentDefinitionOutput(
+                                                                entity.getResident().getRoom(),
+                                                                entity.getResident().getBed());
+                                        }
+
+                                        output.LOCTier = locTierMap.getOrDefault(
+                                                        Long.valueOf(entity.getResident().getId()),
+                                                        0);
+
+                                        output.goalCount = entity.getListCareGoal().size();
+
+                                        UserEntity author = authorMap.get(Long.valueOf(entity.getCreatedBy()));
+
+                                        output.createdBy = new CarePlanOutput.CarePlanAuthorOutput(
+                                                        author.getId().intValue(),
+                                                        author.getFirstName(),
+                                                        author.getRole().getRoleName());
+
+                                        output.interventionCount = 0;
+
+                                        output.createdAt = entity.getCreatedAt() == null
                                                         ? null
                                                         : entity.getCreatedAt().toString();
-                                        dto.updatedAt = entity.getUpdatedAt() == null
+
+                                        output.updatedAt = entity.getUpdatedAt() == null
                                                         ? null
                                                         : entity.getUpdatedAt().toString();
 
-                                        return dto;
+                                        output.isDeleted = entity.getIsDeleted();
+
+                                        return output;
                                 })
                                 .toList();
 
                 return PagedResponse.of(
-                                list,
+                                new ListCarePlanResponseDTO(outputs),
                                 HttpStatus.OK.value(),
                                 "Success",
                                 pageCarePlanEntity.getNumber(),

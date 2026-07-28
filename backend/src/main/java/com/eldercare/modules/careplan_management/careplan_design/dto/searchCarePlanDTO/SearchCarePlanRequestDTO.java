@@ -5,6 +5,7 @@ import org.springframework.data.domain.Sort;
 
 public class SearchCarePlanRequestDTO {
     public String keyword;
+    public String residentName;
     public CarePlanStatusEnum status;
     public Boolean significantChangeFlag;
 
