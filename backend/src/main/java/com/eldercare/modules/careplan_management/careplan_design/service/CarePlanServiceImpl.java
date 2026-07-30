@@ -4,56 +4,60 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
+import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 
-import com.eldercare.common.dto.PagedResponse;
-import com.eldercare.common.enums.CarePlanGoalStatusEnum;
-import com.eldercare.common.enums.CarePlanStatusEnum;
-import com.eldercare.modules.admin.user_management.UserEntity;
-import com.eldercare.modules.admin.user_management.UserRepository;
-import com.eldercare.modules.careplan_management.careplan_design.dto.createCarePlanDTO.CreateCarePlanRequestDTO;
-import com.eldercare.modules.careplan_management.careplan_design.dto.createCarePlanDTO.CreateCarePlanResponseDTO;
-import com.eldercare.modules.careplan_management.careplan_design.dto.deleteCarePlanDTO.DeleteCarePlanRequestDTO;
-import com.eldercare.modules.careplan_management.careplan_design.dto.deleteCarePlanDTO.DeleteCarePlanResponseDTO;
-import com.eldercare.modules.careplan_management.careplan_design.dto.getCarePlanDetailDTO.GetCarePlanDetailRequestDTO;
-import com.eldercare.modules.careplan_management.careplan_design.dto.getCarePlanDetailDTO.GetCarePlanDetailResponseDTO;
-import com.eldercare.modules.careplan_management.careplan_design.dto.searchCarePlanDTO.SearchCarePlanRequestDTO;
-import com.eldercare.modules.careplan_management.careplan_design.dto.searchCarePlanDTO.SearchCarePlanResponseDTO;
-import com.eldercare.modules.careplan_management.careplan_design.entity.CareGoalEntity;
-import com.eldercare.modules.careplan_management.careplan_design.entity.CareInterventionEntity;
-import com.eldercare.modules.careplan_management.careplan_design.entity.resident_info.CarePlanResidentInfoEntity;
-import com.eldercare.modules.resident_intake.resident_profile.ResidentEntity;
-
-import jakarta.transaction.Transactional;
-
-import org.hibernate.id.IntegralDataTypeHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import com.eldercare.common.dto.PagedResponse;
+import com.eldercare.common.enums.CarePlanGoalStatusEnum;
+import com.eldercare.common.enums.CarePlanStatusEnum;
+import com.eldercare.modules.admin.facility_setup.care_level.dto.response.CareLevelRateResponse;
+import com.eldercare.modules.admin.facility_setup.care_level.service.CareLevelService;
+import com.eldercare.modules.admin.user_management.UserEntity;
 import com.eldercare.modules.careplan_management.careplan_design.dto.CarePlanStatusLabelFormat;
 import com.eldercare.modules.careplan_management.careplan_design.dto.activeCarePlanDTO.ActiveCarePlanRequestDTO;
 import com.eldercare.modules.careplan_management.careplan_design.dto.activeCarePlanDTO.ActiveCarePlanResponseDTO;
+import com.eldercare.modules.careplan_management.careplan_design.dto.createCarePlanDTO.CreateCarePlanRequestDTO;
+import com.eldercare.modules.careplan_management.careplan_design.dto.createCarePlanDTO.CreateCarePlanResponseDTO;
+import com.eldercare.modules.careplan_management.careplan_design.dto.deleteCarePlanDTO.DeleteCarePlanRequestDTO;
+import com.eldercare.modules.careplan_management.careplan_design.dto.deleteCarePlanDTO.DeleteCarePlanResponseDTO;
 import com.eldercare.modules.careplan_management.careplan_design.dto.discontinueCarePlanDTO.DiscontinueCarePlanRequestDTO;
 import com.eldercare.modules.careplan_management.careplan_design.dto.discontinueCarePlanDTO.DiscontinueCarePlanResponseDTO;
+import com.eldercare.modules.careplan_management.careplan_design.dto.getCarePlanDetailDTO.GetCarePlanDetailRequestDTO;
+import com.eldercare.modules.careplan_management.careplan_design.dto.getCarePlanDetailDTO.GetCarePlanDetailResponseDTO;
 import com.eldercare.modules.careplan_management.careplan_design.dto.listCarePlansDTO.CarePlanOutput;
 import com.eldercare.modules.careplan_management.careplan_design.dto.listCarePlansDTO.ListCarePlanRequestDTO;
 import com.eldercare.modules.careplan_management.careplan_design.dto.listCarePlansDTO.ListCarePlanResponseDTO;
 import com.eldercare.modules.careplan_management.careplan_design.dto.markSignificantChangeDTO.MarkSignificantChangeRequestDTO;
 import com.eldercare.modules.careplan_management.careplan_design.dto.markSignificantChangeDTO.MarkSignificantChangeResponseDTO;
+import com.eldercare.modules.careplan_management.careplan_design.dto.searchCarePlanDTO.SearchCarePlanRequestDTO;
+import com.eldercare.modules.careplan_management.careplan_design.entity.CareGoalEntity;
+import com.eldercare.modules.careplan_management.careplan_design.entity.CareInterventionEntity;
 import com.eldercare.modules.careplan_management.careplan_design.entity.CarePlanEntity;
+import com.eldercare.modules.careplan_management.careplan_design.entity.resident_info.CarePlanResidentInfoEntity;
+import com.eldercare.modules.careplan_management.careplan_design.service.loc_service.ILocRateEstimation;
+import com.eldercare.modules.resident_intake.resident_profile.ResidentEntity;
+
+import jakarta.transaction.Transactional;
 
 @Service
-public class CarePlanServiceImpl implements ICarePlanService {
+public class CarePlanServiceImpl implements ICarePlanService, ILocRateEstimation {
 
         private static final Logger log = LoggerFactory.getLogger(CarePlanServiceImpl.class);
         private final ICarePlanRepository carePlanRepository;
+        private final CareLevelService careLevelService;
 
-        public CarePlanServiceImpl(ICarePlanRepository carePlanRepository) {
+        public CarePlanServiceImpl(ICarePlanRepository carePlanRepository, CareLevelService careLevelService) {
                 this.carePlanRepository = carePlanRepository;
+                this.careLevelService = careLevelService;
         }
 
         @Override
@@ -189,6 +193,7 @@ public class CarePlanServiceImpl implements ICarePlanService {
         @Override
         @Transactional()
         public GetCarePlanDetailResponseDTO getCarePlanDetail(GetCarePlanDetailRequestDTO requestDTO) {
+                double randomBedRate = ThreadLocalRandom.current().nextDouble(30.0, 200.0);
 
                 CarePlanEntity carePlanEntity = this.carePlanRepository.findById(requestDTO.id);
                 List<Long> authorIds = new ArrayList<>();
@@ -198,8 +203,21 @@ public class CarePlanServiceImpl implements ICarePlanService {
                 List<Long> residentIds = new ArrayList<>();
                 residentIds.add((long) carePlanEntity.getResident().getId());
                 Map<Long, Integer> locTierMap = this.carePlanRepository.getLOCTierFromResidentIds(residentIds);
+                System.out.println(locTierMap);
+                List<CareLevelRateResponse> listCareLevelRateResponses = this.careLevelService
+                                .getCareLevelRates((long) locTierMap.get((long) carePlanEntity.getResident().getId()));
+
+                CareLevelRateResponse careLevelRateResponse = listCareLevelRateResponses.get(0);
+                String dailyCostEstimate = this.calculateCostDaily(careLevelRateResponse.getDailyRate().doubleValue(),
+                                randomBedRate);
+                String monthyCostEstimate = this
+                                .calculateCostMonthly(careLevelRateResponse.getDailyRate().doubleValue(),
+                                                randomBedRate);
 
                 GetCarePlanDetailResponseDTO responseDTO = new GetCarePlanDetailResponseDTO();
+                responseDTO.costEstimation = new GetCarePlanDetailResponseDTO.CostEstimation(dailyCostEstimate,
+                                monthyCostEstimate, String.valueOf(careLevelRateResponse.getDailyRate().doubleValue()),
+                                String.valueOf(String.format("%.2f", randomBedRate)));
                 responseDTO.id = carePlanEntity.getId();
                 responseDTO.status = CarePlanStatusLabelFormat.getLabel(carePlanEntity);
                 responseDTO.significantFlag = carePlanEntity.getSignificantFlag();
@@ -256,42 +274,6 @@ public class CarePlanServiceImpl implements ICarePlanService {
                 return responseDTO;
         }
 
-        // @Override
-        // public PagedResponse<List<SearchCarePlanResponseDTO>> searchCarePlan(
-        // SearchCarePlanRequestDTO requestDTO) {
-
-        // Page<CarePlanEntity> pageCarePlanEntity =
-        // carePlanRepository.searchPagination(requestDTO);
-
-        // List<SearchCarePlanResponseDTO> list = pageCarePlanEntity.getContent()
-        // .stream()
-        // .map(entity -> {
-        // SearchCarePlanResponseDTO dto = new SearchCarePlanResponseDTO();
-        // dto.id = entity.getId();
-        // dto.residentId = entity.getResident().getId();
-        // dto.residentName = entity.getResident().getFullname();
-        // dto.status = CarePlanStatusLabelFormat.getLabel(entity);
-        // dto.significantChangeFlag = entity.getSignificantFlag();
-        // dto.createdAt = entity.getCreatedAt() == null
-        // ? null
-        // : entity.getCreatedAt().toString();
-        // dto.updatedAt = entity.getUpdatedAt() == null
-        // ? null
-        // : entity.getUpdatedAt().toString();
-
-        // return dto;
-        // })
-        // .toList();
-
-        // return PagedResponse.of(
-        // list,
-        // HttpStatus.OK.value(),
-        // "Success",
-        // pageCarePlanEntity.getNumber(),
-        // pageCarePlanEntity.getTotalPages(),
-        // pageCarePlanEntity.getSize(),
-        // pageCarePlanEntity.getTotalElements());
-        // }
         @Override
         @Transactional
         public PagedResponse<ListCarePlanResponseDTO> searchCarePlan(
@@ -490,6 +472,22 @@ public class CarePlanServiceImpl implements ICarePlanService {
                 DeleteCarePlanResponseDTO responseDTo = new DeleteCarePlanResponseDTO(
                                 carePlanEntityAfterUpdated.getId(), carePlanEntityAfterUpdated.getIsDeleted());
                 return responseDTo;
+        }
+
+        @Override
+        public String calculateCostDaily(double locTierRate, double bedRate) {
+                double result;
+                double dailyLocRate = locTierRate / 30;
+                result = dailyLocRate + bedRate;
+
+                return String.valueOf(String.format("%.2f", result));
+        }
+
+        @Override
+        public String calculateCostMonthly(double locTierRate, double bedRate) {
+                double result;
+                result = locTierRate + (bedRate * 30);
+                return String.valueOf(String.format("%.2f", result));
         }
 
 }

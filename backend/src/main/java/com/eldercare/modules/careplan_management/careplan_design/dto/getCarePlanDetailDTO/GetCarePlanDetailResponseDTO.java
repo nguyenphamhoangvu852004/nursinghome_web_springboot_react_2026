@@ -21,6 +21,7 @@ public class GetCarePlanDetailResponseDTO {
     public String createdAt;
     public String updatedAt;
     public Boolean isDeleted;
+    public CostEstimation costEstimation;
 
     public static class Goal {
         public int id;
@@ -34,5 +35,22 @@ public class GetCarePlanDetailResponseDTO {
         public int id;
         public String title;
         public String assignedRole;
+    }
+
+    public static class CostEstimation {
+        public String locTierRatePerDay;
+        public String locTierRatePerMonth;
+        public String locTierRate;
+        public String bedRate;
+
+        public CostEstimation(String locTierRatePerDay, String locTierRatePerMonth, String locTierRate,
+                String bedRate) {
+
+            this.locTierRatePerDay = locTierRatePerDay;
+            this.locTierRatePerMonth = locTierRatePerMonth;
+            this.locTierRate = locTierRate;
+            this.bedRate = bedRate;
+        }
+
     }
 }
