@@ -134,12 +134,7 @@ export default function CarePlanDetailPage() {
       </div> */}
 
       <div className="tab mt-4">
-        <CarePlanNavBar
-          listCareGoals={carePlan.goals}
-          cycle={carePlan.cycle}
-          lastReview={carePlan.lastReviewedDateTime ?? "null"}
-          nextReview={carePlan.nextReviewDateTime ?? "null"}
-        ></CarePlanNavBar>
+        <CarePlanNavBar carePlanDetail={carePlan}></CarePlanNavBar>
       </div>
     </div>
   );

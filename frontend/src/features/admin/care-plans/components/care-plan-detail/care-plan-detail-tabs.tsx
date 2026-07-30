@@ -2,13 +2,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 import CarePlainDetailTabActivity from "../../pages/care-plan-detail/tab/care-plan-detail-tab-acitivity";
 import CarePlanDetailTabOverview from "../../pages/care-plan-detail/tab/care-plan-detail-tab-overview";
 import CarePlanDetailTabCost from "../../pages/care-plan-detail/tab/care-plan-detail-tab-cost";
-import type { CarePlanGoal } from "@/services/care-plan/care-plan-types";
+import type {
+  CarePlanDetail,
+  CarePlanGoal,
+} from "@/services/care-plan/care-plan-types";
 
 type CarePlanNavBarProps = {
-  listCareGoals: CarePlanGoal[];
-  lastReview: string;
-  nextReview: string;
-  cycle: number;
+  carePlanDetail: CarePlanDetail;
 };
 export default function CarePlanNavBar(props: CarePlanNavBarProps) {
   return (
@@ -22,10 +22,12 @@ export default function CarePlanNavBar(props: CarePlanNavBarProps) {
 
         <TabsContent value="overview">
           <CarePlanDetailTabOverview
-            listCareGoals={props.listCareGoals}
-            reviewCycle={props.cycle}
-            lastReview={props.lastReview}
-            nextReview={props.nextReview}
+            listCareGoals={props.carePlanDetail.goals}
+            reviewCycle={props.carePlanDetail.cycle}
+            lastReview={props.carePlanDetail.lastReviewedDateTime ?? null}
+            nextReview={props.carePlanDetail.nextReviewDateTime ?? null}
+            costEstimate={props.carePlanDetail.costEstimation}
+            locTier={props.carePlanDetail.locTier.toString()}
           ></CarePlanDetailTabOverview>
         </TabsContent>
 

@@ -12,11 +12,17 @@ export type CarePlanAuthor = {
   fullname: string;
   role: string;
 };
+
+export type CostEstimation = {
+  locTierRatePerDay: string;
+  locTierRatePerMonth: string;
+  locTierRate: string;
+  bedRate: string;
+};
 export type CarePlan = {
   id: number;
   LOCTier: number;
   cycle: number;
-
   status:
     | "Draft"
     | "Active"
@@ -71,6 +77,7 @@ export type CarePlanDetail = {
   significantFlag: boolean;
   isDeleted: boolean;
 
+  costEstimation: CostEstimation;
   createdAt: string;
   updatedAt: string;
 

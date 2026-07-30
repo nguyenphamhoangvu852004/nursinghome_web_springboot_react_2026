@@ -9,20 +9,27 @@ import {
   TimelineTitle,
 } from "@/components/ui/timeline";
 import Flag from "../../../ui/flag";
-import type { CarePlanGoal } from "@/services/care-plan/care-plan-types";
+import type {
+  CarePlanGoal,
+  CostEstimation,
+} from "@/services/care-plan/care-plan-types";
 import { formatOffsetDateTimeToDate } from "../../../utils/time-utils";
 
 export type CarePlanDetailTabOverviewProps = {
   listCareGoals: CarePlanGoal[];
   reviewCycle: number;
-  lastReview: string;
-  nextReview: string;
+  lastReview: string | null;
+  nextReview: string | null;
+  costEstimate: CostEstimation;
+  locTier: string;
 };
 export default function CarePlanDetailTabOverview({
   listCareGoals,
   reviewCycle,
   lastReview,
   nextReview,
+  costEstimate,
+  locTier,
 }: CarePlanDetailTabOverviewProps) {
   return (
     <div className="w-full">
@@ -157,24 +164,24 @@ export default function CarePlanDetailTabOverview({
             <div className="rounded-[6px] border-gray-200 bg-white border-2 p-[8px] mb-[16px]">
               <p className="text-lg font-bold">Cost Estimate</p>
               <div className=" flex flex-row justify-between">
-                <p>Loc rate (Tier 3)</p>
-                <p className="font-bold">$234.77 / day</p>
+                <p>Loc rate (Tier {locTier})</p>
+                <p className="font-bold">{`$${costEstimate.locTierRate}`}</p>
               </div>
               <div>
                 <p>Room rate (Semi-private)</p>
-                <p className="font-bold">$123.00 / day</p>
+                <p className="font-bold">{`$${costEstimate.bedRate}`}</p>
               </div>
               <div className="border-b-2 border-gray-300"></div>
               <div>
                 <div className=" flex flex-row justify-between">
                   <p className="text-md font-bold">Estimated daily</p>
-                  <p className="font-bold">$123.00 / day</p>
+                  <p className="font-bold">{`$${costEstimate.locTierRatePerDay}`}</p>
                 </div>
 
                 <div className=" flex flex-row justify-between">
                   <p className="text-md font-bold">Estimated monthly</p>
 
-                  <p className="font-bold">$123.00 / day</p>
+                  <p className="font-bold">{`$${costEstimate.locTierRatePerMonth}`}</p>
                 </div>
 
                 <div>
