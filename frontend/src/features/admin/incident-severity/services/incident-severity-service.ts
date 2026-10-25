@@ -34,7 +34,7 @@ export const createIncidentSeverityLevel = async (
   request: CreateIncidentSeverityRequest
 ): Promise<IncidentSeverityResponse> => {
   const response = await apiClient.post<IncidentSeverityApiResponse>(
-    "/admin/incident-severity-levels",
+    "/incident-severity-levels",
     request
   );
 
@@ -48,7 +48,7 @@ export const createIncidentSeverityLevel = async (
 };
 
 export const fetchIncidentSeverityLevels = async (): Promise<IncidentSeverityResponse[]> => {
-  const response = await apiClient.get<IncidentSeverityApiResponse[]>("/admin/incident-severity-levels");
+  const response = await apiClient.get<IncidentSeverityApiResponse[]>("/incident-severity-levels");
   console.log("API response incident severity levels:", response.data);
 
   return response.data.map((item) => ({
@@ -65,7 +65,7 @@ export const updateIncidentSeverityLevel = async (
   request: UpdateIncidentSeverityRequest
 ): Promise<IncidentSeverityResponse> => {
   const response = await apiClient.put<IncidentSeverityApiResponse>(
-    `/admin/incident-severity-levels/${severityId}`,
+    `/incident-severity-levels/${severityId}`,
     request
   );
 

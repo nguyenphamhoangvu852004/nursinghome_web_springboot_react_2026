@@ -11,7 +11,7 @@ export const residentLocService = {
     ): Promise<CareLevelHistory[]> => {
 
         const response = await axiosInstance.get(
-            `/api/v1/residents/${residentId}/care-level-history`
+            `/residents/${residentId}/care-level-history`
         );
 
         return response.data;
@@ -22,7 +22,7 @@ export const residentLocService = {
     ): Promise<LocClassificationResult> => {
 
         const response = await axiosInstance.get(
-            `/api/v1/assessments/resident/${residentId}/classification-result`
+            `/assessments/resident/${residentId}/classification-result`
         );
 
         return response.data.data;

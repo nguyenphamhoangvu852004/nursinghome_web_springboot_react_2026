@@ -1,7 +1,7 @@
 package com.eldercare.modules.careplan_management.cna_daily_tasks.entity;
 
 import com.eldercare.modules.admin.user_management.UserEntity;
-import com.eldercare.modules.careplan_management.careplan_design.repository.database_schema.CareInterventionSchema;
+import com.eldercare.modules.careplan_management.careplan_design.entity.CareInterventionEntity;
 import com.eldercare.modules.careplan_management.cna_daily_tasks.enums.TaskStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -42,7 +42,7 @@ public class CareTaskEntity {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "care_intervention_id", nullable = false)
-    private CareInterventionSchema careIntervention;
+    private CareInterventionEntity careIntervention;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assigned_cna_id")

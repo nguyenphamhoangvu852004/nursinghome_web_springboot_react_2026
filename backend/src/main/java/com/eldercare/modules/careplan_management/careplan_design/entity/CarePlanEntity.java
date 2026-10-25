@@ -5,28 +5,81 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.eldercare.common.enums.CarePlanStatusEnum;
+import com.eldercare.modules.admin.user_management.UserEntity;
+import com.eldercare.modules.resident_intake.resident_profile.ResidentEntity;
 
-import com.eldercare.modules.careplan_management.careplan_design.entity.resident_info.CarePlanResidentInfoEntity;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.*;
 
+@Entity
+@Table(name = "care_plans")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
+@ToString(exclude = { "resident", "lastReviewedByUser", "createdByUser" })
 public class CarePlanEntity {
 
-    private int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 20)
     private CarePlanStatusEnum status = CarePlanStatusEnum.DRAFT;
+
+    @Column(name = "significant_change_flag", nullable = false)
     private Boolean significantFlag = false;
-    private CarePlanResidentInfoEntity resident = null;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "resident_id", nullable = false)
+    private ResidentEntity resident;
+
+    @OneToMany(mappedBy = "carePlan", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CareGoalEntity> listCareGoal = new ArrayList<>();
+
+    @Column(name = "last_reviewed_datetime")
     private OffsetDateTime lastReviewDateTime = null;
+
+    @Transient
     private String lastReviewBy = null;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "last_reviewed_by")
+    private UserEntity lastReviewedByUser;
+
+    @Transient
     private int createdBy;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "created_by", nullable = false)
+    private UserEntity createdByUser;
+
+    @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
+
+    @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted;
+
+    public void setId(int id) {
+        this.id = (long) id;
+    }
 
     // ------------------------CARE PLAN BUSINESS
     // LOGIC---------------------------------//
@@ -165,6 +218,7 @@ public class CarePlanEntity {
         if (careGoalEntity == null) {
             throw new IllegalArgumentException("Cannot be null");
         }
+        careGoalEntity.setCarePlan(this);
         this.listCareGoal.add(careGoalEntity);
         this.status = CarePlanStatusEnum.PENDING_REVIEW;
     }

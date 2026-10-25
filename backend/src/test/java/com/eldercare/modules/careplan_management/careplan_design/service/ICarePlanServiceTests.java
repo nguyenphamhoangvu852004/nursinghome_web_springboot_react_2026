@@ -1,12 +1,17 @@
 package com.eldercare.modules.careplan_management.careplan_design.service;
 
+import com.eldercare.modules.admin.user_management.UserRepository;
+import com.eldercare.modules.careplan_management.careplan_design.repository.JpaAssessmentRepository;
+import com.eldercare.modules.careplan_management.careplan_design.repository.JpaCarePlanRepository;
+import com.eldercare.modules.resident_intake.resident.repository.ResidentRepository;
+import java.util.Optional;
+
 import com.eldercare.common.enums.CarePlanStatusEnum;
 import com.eldercare.modules.careplan_management.careplan_design.dto.createCarePlanDTO.CreateCarePlanRequestDTO;
 import com.eldercare.modules.careplan_management.careplan_design.dto.createCarePlanDTO.CreateCarePlanResponseDTO;
 import com.eldercare.modules.careplan_management.careplan_design.entity.CarePlanEntity;
 import com.eldercare.modules.resident_intake.resident_profile.ResidentEntity;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -14,7 +19,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,7 +28,16 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ICarePlanServiceTests {
     @Mock
-    private ICarePlanRepository carePlanRepository;
+    private JpaCarePlanRepository carePlanRepository;
+
+    @Mock
+    private ResidentRepository residentRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private JpaAssessmentRepository assessmentRepository;
 
     @InjectMocks
     private CarePlanServiceImpl carePlanService;
@@ -64,10 +77,10 @@ class ICarePlanServiceTests {
         ResidentEntity residentEntity = new ResidentEntity();
         residentEntity.setId(1L);
         residentEntity.setChartLocked(false);
-        when(carePlanRepository.getResidentInfo(1L)).thenReturn(residentEntity);
+        when(residentRepository.findById(1L)).thenReturn(Optional.of(residentEntity));
         CarePlanEntity savedEntity = new CarePlanEntity();
         savedEntity.setId(1);
-        when(carePlanRepository.saveOne(any(CarePlanEntity.class)))
+        when(carePlanRepository.save(any(CarePlanEntity.class)))
                 .thenReturn(savedEntity);
 
         // service calling
@@ -81,7 +94,7 @@ class ICarePlanServiceTests {
                 ArgumentCaptor.forClass(CarePlanEntity.class);
 
         verify(carePlanRepository)
-                .saveOne(captor.capture());
+                .save(captor.capture());
 
         CarePlanEntity saved = captor.getValue();
 
@@ -120,10 +133,10 @@ class ICarePlanServiceTests {
         ResidentEntity residentEntity = new ResidentEntity();
         residentEntity.setId(1L);
         residentEntity.setChartLocked(false);
-        when(carePlanRepository.getResidentInfo(1L)).thenReturn(residentEntity);
+        when(residentRepository.findById(1L)).thenReturn(Optional.of(residentEntity));
         CarePlanEntity savedEntity = new CarePlanEntity();
         savedEntity.setId(1);
-        when(carePlanRepository.saveOne(any(CarePlanEntity.class)))
+        when(carePlanRepository.save(any(CarePlanEntity.class)))
                 .thenReturn(savedEntity);
 
         // service calling
@@ -137,7 +150,7 @@ class ICarePlanServiceTests {
                 ArgumentCaptor.forClass(CarePlanEntity.class);
 
         verify(carePlanRepository)
-                .saveOne(captor.capture());
+                .save(captor.capture());
 
         CarePlanEntity saved = captor.getValue();
 
@@ -175,10 +188,10 @@ class ICarePlanServiceTests {
         ResidentEntity residentEntity = new ResidentEntity();
         residentEntity.setId(1L);
         residentEntity.setChartLocked(false);
-        when(carePlanRepository.getResidentInfo(1L)).thenReturn(residentEntity);
+        when(residentRepository.findById(1L)).thenReturn(Optional.of(residentEntity));
         CarePlanEntity savedEntity = new CarePlanEntity();
         savedEntity.setId(1);
-        when(carePlanRepository.saveOne(any(CarePlanEntity.class)))
+        when(carePlanRepository.save(any(CarePlanEntity.class)))
                 .thenReturn(savedEntity);
 
         // service calling
@@ -189,7 +202,7 @@ class ICarePlanServiceTests {
                 ArgumentCaptor.forClass(CarePlanEntity.class);
 
         verify(carePlanRepository)
-                .saveOne(captor.capture());
+                .save(captor.capture());
 
         CarePlanEntity saved = captor.getValue();
 
@@ -229,7 +242,7 @@ class ICarePlanServiceTests {
         lockedResident.setId(1L);
         // mock this resident chart lock = true
         lockedResident.setChartLocked(true);
-        when(carePlanRepository.getResidentInfo(1L)).thenReturn(lockedResident);
+        when(residentRepository.findById(1L)).thenReturn(Optional.of(lockedResident));
 
         // OUTPUT expected
         RuntimeException exception = assertThrows(RuntimeException.class,
@@ -240,8 +253,8 @@ class ICarePlanServiceTests {
         assertEquals("Resident is locked, can not create care plan for this resident",
                 exception.getMessage());
 
-        verify(carePlanRepository).getResidentInfo(1L);
-        verify(carePlanRepository, never()).saveOne(any(CarePlanEntity.class));
+        verify(residentRepository).findById(1L);
+        verify(carePlanRepository, never()).save(any(CarePlanEntity.class));
     }
 
     @Test
@@ -274,7 +287,7 @@ class ICarePlanServiceTests {
         lockedResident.setId(1L);
         // mock this resident chart lock = true
         lockedResident.setChartLocked(true);
-        when(carePlanRepository.getResidentInfo(1L)).thenReturn(lockedResident);
+        when(residentRepository.findById(1L)).thenReturn(Optional.of(lockedResident));
 
         // OUTPUT expected
         RuntimeException exception = assertThrows(RuntimeException.class,
@@ -285,8 +298,8 @@ class ICarePlanServiceTests {
         assertEquals("Resident is locked, can not create care plan for this resident",
                 exception.getMessage());
 
-        verify(carePlanRepository).getResidentInfo(1L);
-        verify(carePlanRepository, never()).saveOne(any(CarePlanEntity.class));
+        verify(residentRepository).findById(1L);
+        verify(carePlanRepository, never()).save(any(CarePlanEntity.class));
     }
 
     @Test

@@ -1,10 +1,10 @@
 import axios from 'axios';
 import type { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
-import { ENV } from './env';
+import { API_BASE_URL } from './api-url';
 import { API_CONSTANTS } from './constants';
 
 const apiClient: AxiosInstance = axios.create({
-  baseURL: ENV.API_URL.endsWith("/api/v1") ? ENV.API_URL : `${ENV.API_URL}/api/v1`,
+  baseURL: API_BASE_URL,
   timeout: API_CONSTANTS.TIMEOUT,
   headers: API_CONSTANTS.DEFAULT_HEADERS,
   withCredentials: true,

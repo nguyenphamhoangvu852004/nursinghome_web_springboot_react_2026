@@ -5,10 +5,6 @@ import com.eldercare.modules.careplan_management.careplan_design.dto.createCareP
 import com.eldercare.modules.careplan_management.careplan_design.dto.createCarePlanDTO.CreateCarePlanResponseDTO;
 import com.eldercare.modules.careplan_management.careplan_design.dto.deleteCarePlanDTO.DeleteCarePlanRequestDTO;
 import com.eldercare.modules.careplan_management.careplan_design.dto.deleteCarePlanDTO.DeleteCarePlanResponseDTO;
-import com.eldercare.modules.careplan_management.careplan_design.dto.searchCarePlanDTO.SearchCarePlanRequestDTO;
-import com.eldercare.modules.careplan_management.careplan_design.dto.searchCarePlanDTO.SearchCarePlanResponseDTO;
-
-import org.apache.catalina.connector.Response;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,10 +23,8 @@ import com.eldercare.modules.careplan_management.careplan_design.dto.markSignifi
 import com.eldercare.modules.careplan_management.careplan_design.dto.markSignificantChangeDTO.MarkSignificantChangeRequestDTO;
 import com.eldercare.modules.careplan_management.careplan_design.service.ICarePlanService;
 
-import java.util.List;
-
 @RestController
-@RequestMapping("/api/v1/care-plans")
+@RequestMapping("/api/v2/legacy/care-plans")
 public class CarePlanController {
     private final ICarePlanService carePlanService;
 
@@ -67,17 +61,20 @@ public class CarePlanController {
 
     @GetMapping("")
     public ResponseEntity<PagedResponse<ListCarePlanResponseDTO>> listCarePlans(
-            @RequestParam(defaultValue = "0") Integer page, @RequestParam(defaultValue = "20") Integer size,
-            @RequestParam(required = false) Long residentId, @RequestParam(required = false) CarePlanStatusEnum status,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "20") Integer size,
+            @RequestParam(required = false) Long residentId,
+            @RequestParam(required = false) String residentName,
+            @RequestParam(required = false) CarePlanStatusEnum status,
             @RequestParam(required = false) Boolean significantChangeFlag,
             @RequestParam(defaultValue = "updatedAt") String sortBy,
             @RequestParam(defaultValue = "DESC") Sort.Direction sortDir) {
 
         ListCarePlanRequestDTO request = new ListCarePlanRequestDTO(
-                page, size, residentId, status,
+                page, size, residentId, residentName, status,
                 significantChangeFlag, sortBy, sortDir);
-        PagedResponse<ListCarePlanResponseDTO> pagenatedResponse = carePlanService.listCarePlans(request);
-        return ResponseEntity.ok(pagenatedResponse);
+        PagedResponse<ListCarePlanResponseDTO> paginatedResponse = carePlanService.listCarePlans(request);
+        return ResponseEntity.ok(paginatedResponse);
     }
 
     @GetMapping("/{carePlanId}")
@@ -88,27 +85,6 @@ public class CarePlanController {
         ApiResponse<GetCarePlanDetailResponseDTO> response = ApiResponse
                 .success(this.carePlanService.getCarePlanDetail(requestDTO));
         return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/search")
-    public ResponseEntity<PagedResponse<ListCarePlanResponseDTO>> searchCarePlan(
-            @RequestParam(required = false) String residentName,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) CarePlanStatusEnum status,
-            @RequestParam(required = false) Boolean significantChangeFlag,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-        SearchCarePlanRequestDTO requestDTO = new SearchCarePlanRequestDTO();
-
-        requestDTO.residentName = residentName;
-        requestDTO.keyword = keyword;
-        requestDTO.status = status;
-        requestDTO.significantChangeFlag = significantChangeFlag;
-        requestDTO.page = page;
-        requestDTO.size = size;
-
-        PagedResponse<ListCarePlanResponseDTO> pagenatedResponse = carePlanService.searchCarePlan(requestDTO);
-        return ResponseEntity.ok(pagenatedResponse);
     }
 
     @PostMapping("")

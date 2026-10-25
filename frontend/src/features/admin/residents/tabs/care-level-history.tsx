@@ -31,7 +31,7 @@ export const CareLevelHistoryTab = () => {
         console.log("Calling API...");
 
         const response = await axiosInstance.get(
-          `/api/v1/residents/${id}/care-level-history`
+          `/residents/${id}/care-level-history`
         );
 
         console.log("API Response:", response.data);

@@ -1,1 +1,10 @@
 .vscode/
+.codegraph/
+.continue/
+./frontend/node_modules
+./frontend/dist
+
+./backend/.idea
+
+# Local database backups
+backend/src/main/resources/db/*.bak

@@ -62,30 +62,30 @@ export interface ActiveSession {
 
 export const adminService = {
   GetAuditLogs: async (params: AuditLogParams): Promise<PaginatedResponse<AuditLog>> => {
-    const response = await axios.get("/admin/audit-logs", { params });
+    const response = await axios.get("/admin/security-telemetry/audit-logs", { params });
     return response.data;
   },
 
   GetPhiAccessLogs: async (params: PhiAccessLogParams): Promise<PaginatedResponse<PhiAccessLog>> => {
-    const response = await axios.get("/admin/phi-access-logs", { params });
+    const response = await axios.get("/admin/security-telemetry/phi-access-logs", { params });
     return response.data;
   },
 
   GetActiveSessions: async (): Promise<ActiveSession[]> => {
-    const response = await axios.get("/admin/sessions");
+    const response = await axios.get("/admin/security-telemetry/sessions");
     return response.data;
   },
 
   ForceLogout: async (sessionId: string): Promise<void> => {
-    await axios.post(`/admin/sessions/${sessionId}/force-logout`);
+    await axios.post(`/admin/security-telemetry/sessions/${sessionId}/force-logout`);
   },
 
   ChangeUserStatus: async (userId: number, status: string): Promise<void> => {
-    await axios.patch(`/admin/users/${userId}/status`, { status });
+    await axios.patch(`/admin/security-telemetry/users/${userId}/status`, { status });
   },
 
   GetUsers: async (): Promise<any[]> => {
-    const response = await axios.get("/admin/users");
+    const response = await axios.get("/admin/security-telemetry/users");
     return response.data;
   },
 };

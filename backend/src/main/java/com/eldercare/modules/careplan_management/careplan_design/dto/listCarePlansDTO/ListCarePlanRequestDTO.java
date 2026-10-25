@@ -13,6 +13,8 @@ public class ListCarePlanRequestDTO {
 
     public Long residentId;
 
+    public String residentName;
+
     public CarePlanStatusEnum status;
 
     public Boolean significantChangeFlag;

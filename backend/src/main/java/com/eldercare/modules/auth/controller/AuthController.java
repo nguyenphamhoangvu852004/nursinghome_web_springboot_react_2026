@@ -17,7 +17,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@RequestMapping({"/auth", "/api/v1/auth"})
+@RequestMapping("/api/v1/auth")
 @CrossOrigin(origins = "*")
 public class AuthController {
 

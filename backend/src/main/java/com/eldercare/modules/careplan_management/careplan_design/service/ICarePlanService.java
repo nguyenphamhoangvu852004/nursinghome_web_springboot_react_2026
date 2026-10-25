@@ -15,11 +15,6 @@ import com.eldercare.modules.careplan_management.careplan_design.dto.listCarePla
 import com.eldercare.modules.careplan_management.careplan_design.dto.listCarePlansDTO.ListCarePlanResponseDTO;
 import com.eldercare.modules.careplan_management.careplan_design.dto.markSignificantChangeDTO.MarkSignificantChangeRequestDTO;
 import com.eldercare.modules.careplan_management.careplan_design.dto.markSignificantChangeDTO.MarkSignificantChangeResponseDTO;
-import com.eldercare.modules.careplan_management.careplan_design.dto.searchCarePlanDTO.SearchCarePlanRequestDTO;
-import com.eldercare.modules.careplan_management.careplan_design.dto.searchCarePlanDTO.SearchCarePlanResponseDTO;
-
-import java.util.List;
-
 public interface ICarePlanService {
     public ActiveCarePlanResponseDTO activateCarePlan(ActiveCarePlanRequestDTO requestDTO);
 
@@ -30,8 +25,6 @@ public interface ICarePlanService {
     public PagedResponse<ListCarePlanResponseDTO> listCarePlans(ListCarePlanRequestDTO requestDTO);
 
     public GetCarePlanDetailResponseDTO getCarePlanDetail(GetCarePlanDetailRequestDTO requestDTO);
-
-    public PagedResponse<ListCarePlanResponseDTO> searchCarePlan(SearchCarePlanRequestDTO requestDTO);
 
     public CreateCarePlanResponseDTO createCarePlan(CreateCarePlanRequestDTO requestDTO, String purpose);
 

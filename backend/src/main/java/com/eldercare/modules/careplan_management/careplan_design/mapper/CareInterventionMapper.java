@@ -1,20 +1,19 @@
 package com.eldercare.modules.careplan_management.careplan_design.mapper;
 
 import com.eldercare.modules.careplan_management.careplan_design.entity.CareInterventionEntity;
-import com.eldercare.modules.careplan_management.careplan_design.repository.database_schema.CareInterventionSchema;
+import com.eldercare.modules.careplan_management.careplan_design.entity.CareGoalEntity;
 
-public class CareInterventionMapper {
+public final class CareInterventionMapper {
 
-    public static CareInterventionEntity toEntity(CareInterventionSchema schema) {
+    private CareInterventionMapper() {
+    }
 
-        return new CareInterventionEntity(
-
-                schema.getId() == null ? 0 : schema.getId().intValue(),
-
-                schema.getTitle(),
-
-                schema.getAssignedRole()
-
-        );
+    public static CareInterventionEntity attachToCareGoal(CareInterventionEntity intervention,
+            CareGoalEntity careGoal) {
+        if (intervention == null) {
+            return null;
+        }
+        intervention.setCareGoal(careGoal);
+        return intervention;
     }
 }

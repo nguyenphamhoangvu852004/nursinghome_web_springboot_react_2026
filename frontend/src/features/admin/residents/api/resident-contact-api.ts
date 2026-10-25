@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "@/common/config/api-url";
 import axios from "axios";
 import { apiClient } from "@/lib/api-client";
 
@@ -16,7 +17,7 @@ interface ApiResponse<T> {
 }
 
 const residentContactClient = axios.create({
-    baseURL: "/api/v1",
+    baseURL: API_BASE_URL,
     headers: { "Content-Type": "application/json" },
 });
 

@@ -1,127 +1,151 @@
 package com.eldercare.modules.careplan_management.careplan_design.mapper;
 
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import com.eldercare.common.enums.CarePlanStatusEnum;
-import com.eldercare.modules.admin.facility_setup.facility.facility_layout.entity.BedEntity;
+import com.eldercare.common.enums.CarePlanGoalStatusEnum;
 import com.eldercare.modules.admin.user_management.UserEntity;
+import com.eldercare.modules.careplan_management.careplan_design.dto.CarePlanStatusLabelFormat;
+import com.eldercare.modules.careplan_management.careplan_design.dto.createCarePlanDTO.CreateCarePlanRequestDTO;
+import com.eldercare.modules.careplan_management.careplan_design.dto.listCarePlansDTO.CarePlanOutput;
 import com.eldercare.modules.careplan_management.careplan_design.entity.CareGoalEntity;
 import com.eldercare.modules.careplan_management.careplan_design.entity.CareInterventionEntity;
 import com.eldercare.modules.careplan_management.careplan_design.entity.CarePlanEntity;
-import com.eldercare.modules.careplan_management.careplan_design.entity.resident_info.CarePlanResidentInfoEntity;
-import com.eldercare.modules.careplan_management.careplan_design.repository.database_schema.CareGoalSchema;
-import com.eldercare.modules.careplan_management.careplan_design.repository.database_schema.CarePlanSchema;
 import com.eldercare.modules.resident_intake.resident_profile.ResidentEntity;
 
-public class CarePlanMapper {
-        public static CarePlanEntity toEntity(CarePlanSchema schema) {
-                if (schema == null)
-                        return null;
+public final class CarePlanMapper {
 
-                CarePlanEntity newEntity = new CarePlanEntity();
-                newEntity.setCreatedBy(schema.getCreatedBy().getId().intValue());
-                newEntity.setId(schema.getId().intValue());
-                newEntity.setStatus(CarePlanStatusEnum.valueOf(schema.getStatus()));
-                BedEntity bed = schema.getResident().getBed();
-                newEntity.setResident(new CarePlanResidentInfoEntity(
-                                schema.getResident().getId().intValue(),
-                                getResidentFullName(schema.getResident()),
-                                schema.getResident().getDateOfBirth(),
-                                bed != null && bed.getRoom() != null
-                                                ? bed.getRoom().getRoomNumber()
-                                                : null,
-                                bed != null
-                                                ? bed.getBedNumber()
-                                                : null,
-                                schema.getSignificantChangeFlag()));
-                newEntity.setListCareGoal(
-                                schema.getListCareGoal().stream().map(careGoalschema -> new CareGoalEntity(
-                                                careGoalschema.getId().intValue(),
-                                                careGoalschema.getTitle(),
-                                                careGoalschema.getDescription(),
-                                                careGoalschema.getStatus(),
-                                                careGoalschema.getListCareIntervention().stream().map(
-                                                                careInterventionSchema -> new CareInterventionEntity(
-                                                                                careInterventionSchema.getId()
-                                                                                                .intValue(),
-                                                                                careInterventionSchema.getTitle(),
-                                                                                careInterventionSchema
-                                                                                                .getAssignedRole()))
-                                                                .toList()))
-                                                .toList());
-                newEntity.setCreatedAt(schema.getCreatedAt());
-                newEntity.setUpdatedAt(schema.getUpdatedAt());
-                newEntity.setIsDeleted(schema.getIsDeleted());
-                newEntity.setSignificantFlag(schema.getSignificantChangeFlag());
-                newEntity.setLastReviewDateTime(
-                                schema.getLastReviewedDateTime() == null ? null : schema.getLastReviewedDateTime());
-                newEntity.setLastReviewBy(
-                                schema.getLastReviewedBy() != null ? schema.getLastReviewedBy().getId().toString()
-                                                : null);
-
-                return newEntity;
+        private CarePlanMapper() {
         }
 
-        public static CarePlanSchema toSchema(CarePlanEntity entity) {
-                if (entity == null)
+        public static CarePlanEntity toEntity(CreateCarePlanRequestDTO dto) {
+                if (dto == null) {
                         return null;
-
-                CarePlanSchema schema = new CarePlanSchema();
-                ResidentEntity resident = new ResidentEntity();
-                resident.setId((long) entity.getResident().getId());
-                UserEntity user = new UserEntity();
-                user.setId((long) entity.getCreatedBy());
-                schema.setResident(resident);
-                if (entity.getId() > 0) {
-                        schema.setId((long) entity.getId());
                 }
 
-                List<CareGoalSchema> goalSchemas = entity.getListCareGoal()
-                                .stream()
-                                .map(goal -> {
-                                        CareGoalSchema goalSchema = new CareGoalSchema();
+                CarePlanEntity entity = new CarePlanEntity();
+                List<CareGoalEntity> goals = dto.listCareGoal == null
+                                ? new ArrayList<>()
+                                : dto.listCareGoal.stream()
+                                                .map(goalDTO -> {
+                                                        CareGoalEntity goal = new CareGoalEntity();
+                                                        goal.setName(goalDTO.name);
+                                                        goal.setDesiredOutCome(goalDTO.description);
+//                                                        goal.setStatus(CarePlanGoalStatusEnum.IN_PROGRESS);
 
-                                        goalSchema.setTitle(goal.getName());
-                                        goalSchema.setDescription(goal.getDescription());
-                                        goalSchema.setStatus(goal.getStatus());
-
-                                        goalSchema.setCarePlan(schema);
-
-                                        return goalSchema;
-                                })
-                                .toList();
-
-                schema.setStatus(entity.getStatus().name());
-                schema.setSignificantChangeFlag(entity.getSignificantFlag());
-                schema.setIsDeleted(entity.getIsDeleted());
-                schema.setCreatedAt(entity.getCreatedAt());
-                schema.setUpdatedAt(entity.getUpdatedAt());
-                schema.setCreatedBy(user);
-                schema.setListCareGoal(goalSchemas);
-                return schema;
+                                                        List<CareInterventionEntity> interventions = goalDTO.listCareIntervention == null
+                                                                        ? new ArrayList<>()
+                                                                        : goalDTO.listCareIntervention.stream()
+                                                                                        .map(interventionDTO -> {
+                                                                                                CareInterventionEntity intervention = new CareInterventionEntity();
+                                                                                                intervention.setName(
+                                                                                                                interventionDTO.name);
+                                                                                                intervention.setAssignedRole(
+                                                                                                                interventionDTO.assingedRole);
+                                                                                                return intervention;
+                                                                                        })
+                                                                                        .toList();
+                                                        goal.setListCareIntervention(interventions);
+                                                        return goal;
+                                                })
+                                                .toList();
+                entity.setListCareGoal(goals);
+                return entity;
         }
 
-        private static String getResidentFullName(ResidentEntity residentEntity) {
-                StringBuilder fullname = new StringBuilder();
-
-                if (residentEntity.getFirstName() != null) {
-                        fullname.append(residentEntity.getFirstName());
+        public static CarePlanOutput toDTO(CarePlanEntity entity, UserEntity author, int locTier) {
+                if (entity == null) {
+                        return null;
                 }
 
-                if (residentEntity.getMiddleName() != null) {
-                        if (!fullname.isEmpty()) {
-                                fullname.append(" ");
-                        }
-                        fullname.append(residentEntity.getMiddleName());
+                CarePlanOutput dto = new CarePlanOutput();
+                dto.id = entity.getId().intValue();
+                dto.status = CarePlanStatusLabelFormat.getLabel(entity);
+                dto.significantFlag = entity.getSignificantFlag();
+                dto.lastReviewedBy = entity.getLastReviewBy();
+                dto.lastReviewedDateTime = entity.getLastReviewDateTime() == null
+                                ? null
+                                : entity.getLastReviewDateTime().toString();
+
+                OffsetDateTime nextReview = entity.getNextReviewDateTime();
+                dto.nextReviewDateTime = nextReview == null
+                                ? "-"
+                                : nextReview.isBefore(OffsetDateTime.now())
+                                                ? "Overdue"
+                                                : nextReview.toLocalDate().toString();
+                dto.cycle = 90;
+
+                ResidentEntity resident = entity.getResident();
+                dto.resident = new CarePlanOutput.CarePlanResidentOutput(
+                                resident.getId().intValue(),
+                                getResidentFullName(resident),
+                                resident.getDateOfBirth().toString());
+
+                String roomNumber = getRoomNumber(resident);
+                String bedNumber = getBedNumber(resident);
+                dto.definition = new CarePlanOutput.CarePlanResidentDefinitionOutput(
+                                roomNumber == null || bedNumber == null ? "" : roomNumber,
+                                roomNumber == null || bedNumber == null ? "" : bedNumber);
+                dto.LOCTier = locTier;
+                dto.goalCount = entity.getListCareGoal().size();
+                dto.createdBy = new CarePlanOutput.CarePlanAuthorOutput(
+                                author.getId().intValue(),
+                                author.getFirstName(),
+                                author.getRole().getRoleName());
+                dto.interventionCount = 0;
+                dto.createdAt = entity.getCreatedAt() == null ? null : entity.getCreatedAt().toString();
+                dto.updatedAt = entity.getUpdatedAt() == null ? null : entity.getUpdatedAt().toString();
+                dto.isDeleted = entity.getIsDeleted();
+                return dto;
+        }
+
+        public static CarePlanEntity prepareForRead(CarePlanEntity entity) {
+                if (entity == null) {
+                        return null;
                 }
 
-                if (residentEntity.getLastName() != null) {
-                        if (!fullname.isEmpty()) {
-                                fullname.append(" ");
-                        }
-                        fullname.append(residentEntity.getLastName());
+                if (entity.getCreatedByUser() != null) {
+                        entity.setCreatedBy(entity.getCreatedByUser().getId().intValue());
                 }
 
-                return fullname.toString();
+                entity.setLastReviewBy(entity.getLastReviewedByUser() == null
+                                ? null
+                                : entity.getLastReviewedByUser().getId().toString());
+                return entity;
+        }
+
+        public static CarePlanEntity prepareForSave(CarePlanEntity entity) {
+                if (entity == null) {
+                        return null;
+                }
+
+                if (entity.getCreatedByUser() == null) {
+                        UserEntity user = new UserEntity();
+                        user.setId((long) entity.getCreatedBy());
+                        entity.setCreatedByUser(user);
+                }
+
+                entity.getListCareGoal().forEach(goal -> CareGoalMapper.attachToCarePlan(goal, entity));
+                return entity;
+        }
+
+        private static String getResidentFullName(ResidentEntity resident) {
+                return Stream.of(resident.getFirstName(), resident.getMiddleName(), resident.getLastName())
+                                .filter(namePart -> namePart != null && !namePart.isBlank())
+                                .collect(Collectors.joining(" "));
+        }
+
+        private static String getRoomNumber(ResidentEntity resident) {
+                if (resident.getBed() == null || resident.getBed().getRoom() == null) {
+                        return null;
+                }
+                return resident.getBed().getRoom().getRoomNumber();
+        }
+
+        private static String getBedNumber(ResidentEntity resident) {
+                return resident.getBed() == null ? null : resident.getBed().getBedNumber();
         }
 }

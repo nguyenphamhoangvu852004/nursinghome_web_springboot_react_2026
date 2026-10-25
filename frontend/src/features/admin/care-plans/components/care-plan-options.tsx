@@ -1,109 +1,58 @@
+import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { ChevronDown, Search } from "lucide-react";
-import { useEffect, useState } from "react";
-import Text from "../ui/Text";
-const statusOptions = [
-  "All",
-  "Draft",
-  "Pending review",
-  "Active",
-  "Review due",
-  "Needs update",
-  "Archived",
-];
+import { carePlanStates, carePlanVersionStatuses } from "@/services/care-plan/care-plan-v2-types";
+import { carePlanSortOptions } from "../hooks/use-care-plans";
+import type { CarePlanFilters } from "../hooks/use-care-plans";
 
-const reviewOptions = ["All", "Overdue", "Within 7 days", "Within 30 days"];
+interface Props {
+  filters: CarePlanFilters;
+  onChange: (patch: Partial<CarePlanFilters>) => void;
+  onReset: () => void;
+}
+const selectClass = "h-10 w-full rounded-lg border bg-white px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-primary";
 
-type CarePlanOptionsProps = {
-  onSearch: (residentName?: string, status?: string) => void;
-};
-export default function CarePlanOptions(props: CarePlanOptionsProps) {
-  const [status, setStatus] = useState("All");
-  const [review, setReview] = useState("All");
-  const [residentName, setResidentName] = useState("");
-
+export default function CarePlanOptions({ filters, onChange, onReset }: Props) {
   return (
-    <div className="flex flex-row items-center flex-wrap gap-3 mt-3">
-      <div className="relative flex-1 min-w-[300px] ">
-        <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-
-        <Input
-          className="border-gray-400 bg-[#fafcfe] w-full pl-10 text-lg h-15"
-          placeholder="Input Resident name,..."
-          value={residentName}
-          onChange={(e) => setResidentName(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              props.onSearch(
-                residentName,
-                status === "All"
-                  ? undefined
-                  : status.toUpperCase().replace(/\s+/g, "_"),
-              );
-            }
-          }}
-        />
+    <div className="space-y-4 rounded-2xl border bg-white p-5 shadow-sm">
+      <form className="flex flex-wrap gap-2" onSubmit={(event) => {
+        event.preventDefault();
+        onChange({ search: String(new FormData(event.currentTarget).get("search") ?? "").trim() });
+      }}>
+        <label className="relative min-w-48 flex-1">
+          <span className="sr-only">Search care plans</span>
+          <Search className="absolute top-3 left-3 size-4 text-muted-foreground" />
+          <Input key={filters.search} name="search" defaultValue={filters.search} maxLength={200}
+            placeholder="Resident name, resident ID, admission ID or plan ID" className="h-10 pl-9" />
+        </label>
+        <Button type="submit" className="h-10 px-4">Search</Button>
+      </form>
+      <div className="grid items-end gap-3 sm:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_auto]">
+        <label className="space-y-2 text-xs font-medium text-muted-foreground">
+          <span>Plan state</span>
+          <select className={selectClass} value={filters.state}
+            onChange={(event) => onChange({ state: event.target.value as CarePlanFilters["state"] })}>
+            <option value="">All plan states</option>
+            {Object.entries(carePlanStates).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+          </select>
+        </label>
+        <label className="space-y-2 text-xs font-medium text-muted-foreground">
+          <span>Latest version</span>
+          <select className={selectClass} value={filters.versionStatus}
+            onChange={(event) => onChange({ versionStatus: event.target.value as CarePlanFilters["versionStatus"] })}>
+            <option value="">All version statuses</option>
+            {Object.entries(carePlanVersionStatuses).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+          </select>
+        </label>
+        <label className="space-y-2 text-xs font-medium text-muted-foreground">
+          <span>Sort by</span>
+          <select className={selectClass} value={filters.sort}
+            onChange={(event) => onChange({ sort: event.target.value as CarePlanFilters["sort"] })}>
+            {Object.entries(carePlanSortOptions).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+          </select>
+        </label>
+        <Button variant="ghost" className="h-10" onClick={onReset}><X className="size-4" /> Reset filters</Button>
       </div>
-
-      <DropdownMenu>
-        <DropdownMenuTrigger>
-          <button className="border-2 border-gray-400 bg-[#fafcfe] rounded-lg flex items-center justify-between px-4 h-15 min-w-[180px]">
-            <Text>Status: {status}</Text>
-            <ChevronDown className="h-4 w-4" />
-          </button>
-        </DropdownMenuTrigger>
-
-        <DropdownMenuContent className="w-[180px]">
-          {statusOptions.map((option) => (
-            <DropdownMenuItem
-              key={option}
-              onClick={() => {
-                setStatus(option);
-
-                props.onSearch(
-                  residentName,
-                  option === "All"
-                    ? undefined
-                    : option.toUpperCase().replace(/\s+/g, "_"),
-                );
-              }}
-            >
-              {option}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <DropdownMenu>
-        <DropdownMenuTrigger>
-          <button className="border-2 border-gray-400 bg-[#fafcfe] rounded-lg flex items-center justify-between px-4 h-15 min-w-[180px]">
-            <Text>Review: {review}</Text>
-            <ChevronDown className="h-4 w-4" />
-          </button>
-        </DropdownMenuTrigger>
-
-        <DropdownMenuContent className="w-[180px]">
-          {reviewOptions.map((option) => (
-            <DropdownMenuItem key={option} onClick={() => setReview(option)}>
-              {option}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-      <Button
-        className={`border-2 border-solid border-gray-400  bg-[#fafcfe]  flex items-center justify-center rounded-[8px] text-black h-15 `}
-      >
-        Board
-      </Button>
-
-      <Button className={`md:h-[60px] md:w-[200px] `}>+ New Care Plan</Button>
     </div>
   );
 }

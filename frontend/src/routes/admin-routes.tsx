@@ -2,6 +2,7 @@ import AdmissionPage from "@/features/admin/admissions/pages/admission-page";
 import PreAdmissionPage from "@/features/admin/pre-admission/pages/pre-admission-page";
 import AuditlogPage from "@/features/admin/audit-logs/pages/audit-log-page";
 import CarePlanPage from "@/features/admin/care-plans/pages/care-plan-page";
+import CreateCarePlanPage from "@/features/admin/care-plans/pages/create-care-plan-page";
 import CareTaskPage from "@/features/admin/care-tasks/pages/care-task-page";
 import DashboardPage from "@/features/admin/dashboard/pages/dashboard-page";
 import FacilityPage from "@/features/admin/facilities/pages/facility-page";
@@ -26,6 +27,7 @@ import { AssessmentPage } from "@/features/admin/assessment/pages/assessment-pag
 import CarePlanReviewPage from "@/features/admin/care-plans/pages/care-plan-review-page";
 import CarePlanDetailPage from "@/features/admin/care-plans/pages/care-plan-detail/care-plan-detail-page";
 import EquipmentPage from "@/features/admin/inventory/pages/equipment-page";
+import CarePlanEditorPage from "@/features/admin/care-plans/pages/care-plan-editor-page";
 
 import { LOCRatesPage } from "@/features/admin/facilities/pages/loc-rates-page";
 
@@ -156,6 +158,18 @@ export const adminRoutes: RouteObject = {
           <CarePlanPage />
         </RequirePermission>
       ),
+    },
+    {
+      path: "care-plans/new",
+      element: (
+        <RequirePermission permission={PERMISSIONS.CARE_PLAN_VIEW}>
+          <CreateCarePlanPage />
+        </RequirePermission>
+      ),
+    },
+    {
+      path: "care-plans/:id/edit",
+      element: <RequirePermission permission={PERMISSIONS.CARE_PLAN_VIEW}><CarePlanEditorPage /></RequirePermission>,
     },
     {
       path: "care-plans/:id",

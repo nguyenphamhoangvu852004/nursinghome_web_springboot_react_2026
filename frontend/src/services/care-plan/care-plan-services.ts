@@ -1,3 +1,4 @@
+import { CARE_PLAN_API_BASE_URL } from "@/common/config/api-url";
 import { apiClient } from "@/lib/api-client";
 import type {
   GetCarePlanDetailResponse,
@@ -17,8 +18,9 @@ export type GetCarePlanListParams = {
 export const getCarePlanList = async (
   params?: GetCarePlanListParams,
 ): Promise<GetCarePlanListResponse> => {
-  const response = await apiClient.get<GetCarePlanListResponse>("/care-plans", {
+  const response = await apiClient.get<GetCarePlanListResponse>("/legacy/care-plans", {
     params,
+    baseURL: CARE_PLAN_API_BASE_URL,
   });
 
   return response.data;
@@ -26,7 +28,8 @@ export const getCarePlanList = async (
 
 export const getCarePlanDetail = async (id: number) => {
   const response = await apiClient.get<GetCarePlanDetailResponse>(
-    `/care-plans/${id}`,
+    `/legacy/care-plans/${id}`,
+    { baseURL: CARE_PLAN_API_BASE_URL },
   );
 
   return response.data;
@@ -41,7 +44,7 @@ export type ApproveCarePlanResponse = {
 export const approveCarePlan = async (
   id: number,
 ): Promise<ApproveCarePlanResponse> => {
-  const response = await apiClient.patch(`/care-plans/${id}/activate`);
+  const response = await apiClient.patch(`/legacy/care-plans/${id}/activate`, undefined, { baseURL: CARE_PLAN_API_BASE_URL });
 
   return response.data.data;
 };
@@ -72,7 +75,8 @@ export const searchCarePlans = async (
   }
 
   const response = await apiClient.get<GetCarePlanListResponse>(
-    `/care-plans/search?${params.toString()}`,
+    `/legacy/care-plans/search?${params.toString()}`,
+    { baseURL: CARE_PLAN_API_BASE_URL },
   );
 
   return response.data;

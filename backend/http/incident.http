@@ -1,10 +1,10 @@
 ### Get all Incident Severity -> 200 OK
-GET http://localhost:8080/admin/incident-severity-levels
+GET http://localhost:8080/api/v1/incident-severity-levels
 
 ###
 
 ### Create Incident Severity -> 201 Created
-POST http://localhost:8080/admin/incident-severity-levels
+POST http://localhost:8080/api/v1/incident-severity-levels
 Content-Type: application/json
 
 {
@@ -15,7 +15,7 @@ Content-Type: application/json
 ###
 
 ### Update Incident Severity -> 200 OK
-PUT http://localhost:8080/admin/incident-severity-levels/1
+PUT http://localhost:8080/api/v1/incident-severity-levels/1
 Content-Type: application/json
 
 {
@@ -24,7 +24,7 @@ Content-Type: application/json
 }
 
 ### Update Incident Severity -> 400 Bad Request
-PUT http://localhost:8080/admin/incident-severity-levels/1
+PUT http://localhost:8080/api/v1/incident-severity-levels/1
 Content-Type: application/json
 
 {
@@ -33,7 +33,7 @@ Content-Type: application/json
 }
 
 ### Update ID with non-existing ID -> 404 Not Found
-PUT http://localhost:8080/admin/incident-severity-levels/999
+PUT http://localhost:8080/api/v1/incident-severity-levels/999
 Content-Type: application/json
 
 {

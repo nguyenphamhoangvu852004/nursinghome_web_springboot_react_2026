@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/api/v1/admin/security-telemetry")
 @CrossOrigin(origins = "*")
 public class AdminController {
 

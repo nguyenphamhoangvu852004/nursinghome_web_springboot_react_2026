@@ -1,10 +1,10 @@
 ### Get all SLA Configs -> 200 OK
-GET http://localhost:8080/admin/sla-configs
+GET http://localhost:8080/api/v1/admin/sla-configs
 
 ###
 
 ### Create SLA Config -> 201 Created
-POST http://localhost:8080/admin/sla-configs
+POST http://localhost:8080/api/v1/admin/sla-configs
 Content-Type: application/json
 
 {
@@ -15,7 +15,7 @@ Content-Type: application/json
 ###
 
 ### Update SLA Config -> 200 OK
-PUT http://localhost:8080/admin/sla-configs/1
+PUT http://localhost:8080/api/v1/admin/sla-configs/1
 Content-Type: application/json
 
 {
@@ -24,7 +24,7 @@ Content-Type: application/json
 }
 
 ### Validation Test for SLA Config -> 400 Bad Request
-POST http://localhost:8080/admin/sla-configs
+POST http://localhost:8080/api/v1/admin/sla-configs
 Content-Type: application/json
 
 {
@@ -33,7 +33,7 @@ Content-Type: application/json
 }
 
 ### Update Non-existing SLA -> 404 Not Found
-PUT http://localhost:8080/admin/sla-configs/999
+PUT http://localhost:8080/api/v1/admin/sla-configs/999
 Content-Type: application/json
 
 {

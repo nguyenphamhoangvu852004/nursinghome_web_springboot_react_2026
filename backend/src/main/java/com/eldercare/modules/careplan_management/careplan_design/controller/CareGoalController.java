@@ -14,7 +14,7 @@ import com.eldercare.modules.careplan_management.careplan_design.dto.addCareGoal
 import com.eldercare.modules.careplan_management.careplan_design.service.ICareGoalService;
 
 @RestController
-@RequestMapping("/api/v1/care-plans/{carePlanId}/goals")
+@RequestMapping("/api/v2/legacy/care-plans/{carePlanId}/goals")
 public class CareGoalController {
     private final ICareGoalService careGoalService;
 

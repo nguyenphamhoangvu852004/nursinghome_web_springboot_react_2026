@@ -1,0 +1,24 @@
+@baseUrl = http://localhost:8080
+@token = REPLACE_WITH_NURSE_OR_DON_SESSION_TOKEN
+@goalId = 1
+
+### Create one intervention under a goal in a DRAFT version.
+### Returns 201; requiresTaskGeneration defaults to true, sortOrder to 0.
+POST {{baseUrl}}/api/v2/care-goals/{{goalId}}/interventions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Hỗ trợ di chuyển theo kế hoạch",
+  "instructions": "Thực hiện theo hướng dẫn đã được đánh giá và ghi nhận kết quả.",
+  "responsibleDiscipline": "NURSING",
+  "assignedRole": "CNA",
+  "frequencyCode": "DAILY",
+  "scheduleDefinition": "{\"times\":[\"08:00\"]}",
+  "startDate": "2026-10-23",
+  "endDate": "2026-11-15",
+  "prnCriteria": null,
+  "evidenceOrRationale": "Theo nhu cầu được ghi nhận trong mục tiêu chăm sóc",
+  "requiresTaskGeneration": true,
+  "sortOrder": 10
+}

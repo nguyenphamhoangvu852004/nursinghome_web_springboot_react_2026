@@ -4,8 +4,8 @@ import com.eldercare.common.dto.PagedResponse;
 import com.eldercare.exception.NotFoundException;
 import com.eldercare.modules.admin.user_management.UserEntity;
 import com.eldercare.modules.admin.user_management.UserRepository;
-import com.eldercare.modules.careplan_management.careplan_design.repository.database_schema.CareInterventionSchema;
-import com.eldercare.modules.careplan_management.careplan_design.repository.jpa.JpaCareInterventionRepository;
+import com.eldercare.modules.careplan_management.careplan_design.entity.CareInterventionEntity;
+import com.eldercare.modules.careplan_management.careplan_design.repository.JpaCareInterventionRepository;
 import com.eldercare.modules.careplan_management.cna_daily_tasks.dto.request.CreateTaskRequestDto;
 import com.eldercare.modules.careplan_management.cna_daily_tasks.dto.request.GroupedTaskQuery;
 import com.eldercare.modules.careplan_management.cna_daily_tasks.dto.request.TaskSearchFilter;
@@ -140,7 +140,7 @@ public class CareTaskGroupedServiceImpl implements CareTaskGroupedService {
     @Override
     @Transactional
     public TaskDetailDto createTask(Long interventionId, CreateTaskRequestDto request) {
-        CareInterventionSchema intervention = careInterventionRepository.findById(interventionId)
+        CareInterventionEntity intervention = careInterventionRepository.findById(interventionId)
                 .orElseThrow(() -> new NotFoundException("CareIntervention not found with id: " + interventionId));
 
         UserEntity cna = null;

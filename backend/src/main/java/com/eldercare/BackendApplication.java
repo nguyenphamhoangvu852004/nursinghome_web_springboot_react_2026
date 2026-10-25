@@ -4,11 +4,14 @@ import com.eldercare.modules.admin.user_management.UserEntity;
 import com.eldercare.modules.admin.user_management.UserRepository;
 import com.eldercare.modules.admin.user_management.RoleEntity;
 import com.eldercare.modules.admin.user_management.role.repository.RoleRepository;
+import com.eldercare.modules.careplan_management.careplan_design.repository.v2.CareGoalRepository;
+import com.eldercare.modules.careplan_management.careplan_design.repository.v2.CarePlanRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -27,6 +30,16 @@ public class BackendApplication {
 	}
 
 	@Bean
+	public CommandLineRunner testRepository(CareGoalRepository repo, CarePlanRepository carePlanRepository) {
+			return args -> {
+//				repo.findAll().forEach(System.out::println);
+//				System.out.println(carePlanRepository.findById((long)5).get().toString());
+			};
+	}
+
+
+
+//	@Bean
 	@Profile("!test")
 	public CommandLineRunner activateAdmin(UserRepository userRepository, RoleRepository roleRepository) {
 		return args -> {
