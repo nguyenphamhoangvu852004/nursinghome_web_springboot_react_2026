@@ -1,0 +1,42 @@
+### Get all Incident Severity -> 200 OK
+GET http://localhost:8080/api/v1/incident-severity-levels
+
+###
+
+### Create Incident Severity -> 201 Created
+POST http://localhost:8080/api/v1/incident-severity-levels
+Content-Type: application/json
+
+{
+    "level_name": "Test",
+    "chart_lock_trigger": false
+}
+
+###
+
+### Update Incident Severity -> 200 OK
+PUT http://localhost:8080/api/v1/incident-severity-levels/1
+Content-Type: application/json
+
+{
+    "level_name": "Low Updated",
+    "chart_lock_trigger": true
+}
+
+### Update Incident Severity -> 400 Bad Request
+PUT http://localhost:8080/api/v1/incident-severity-levels/1
+Content-Type: application/json
+
+{
+    "level_name": "",
+    "chart_lock_trigger": true
+}
+
+### Update ID with non-existing ID -> 404 Not Found
+PUT http://localhost:8080/api/v1/incident-severity-levels/999
+Content-Type: application/json
+
+{
+    "level_name":"ABC",
+    "chart_lock_trigger":true
+}

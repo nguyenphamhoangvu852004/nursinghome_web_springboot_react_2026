@@ -11,5 +11,23 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false,
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq, req) => {
+            console.log('>>> Proxying:', req.method, req.url);
+            console.log('>>> Original Origin:', req.headers.origin);
+            proxyReq.removeHeader('origin');
+            proxyReq.removeHeader('Origin');
+            console.log('>>> Forwarded headers:', proxyReq.getHeaders());
+          });
+        }
+      }
+    }
+  }
 })
 
