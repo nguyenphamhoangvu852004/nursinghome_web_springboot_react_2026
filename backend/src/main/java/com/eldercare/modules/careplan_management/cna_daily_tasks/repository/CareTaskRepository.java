@@ -22,8 +22,9 @@ public interface CareTaskRepository extends JpaRepository<CareTaskEntity, Long> 
         FROM CareTaskEntity ct
         JOIN ct.careIntervention ci
         JOIN ci.careGoal cg
-        JOIN cg.carePlan cp
-        JOIN ResidentEntity r ON cp.resident.id = r.id
+        JOIN cg.carePlanVersion cpv
+        JOIN cpv.carePlan cp
+        JOIN ResidentEntity r ON cp.residentId = r.id
         LEFT JOIN r.bed b
         LEFT JOIN b.room rm
         LEFT JOIN ct.assignedCna u
@@ -53,8 +54,9 @@ public interface CareTaskRepository extends JpaRepository<CareTaskEntity, Long> 
         FROM CareTaskEntity ct
         JOIN ct.careIntervention ci
         JOIN ci.careGoal cg
-        JOIN cg.carePlan cp
-        JOIN com.eldercare.modules.resident_intake.resident_profile.ResidentEntity r ON cp.resident.id = r.id
+        JOIN cg.carePlanVersion cpv
+        JOIN cpv.carePlan cp
+        JOIN com.eldercare.modules.resident_intake.resident_profile.ResidentEntity r ON cp.residentId = r.id
         LEFT JOIN r.bed b
         LEFT JOIN b.room rm
         LEFT JOIN ct.assignedCna u
@@ -71,8 +73,9 @@ public interface CareTaskRepository extends JpaRepository<CareTaskEntity, Long> 
         FROM CareTaskEntity ct
         JOIN ct.careIntervention ci
         JOIN ci.careGoal cg
-        JOIN cg.carePlan cp
-        JOIN com.eldercare.modules.resident_intake.resident_profile.ResidentEntity r ON cp.resident.id = r.id
+        JOIN cg.carePlanVersion cpv
+        JOIN cpv.carePlan cp
+        JOIN com.eldercare.modules.resident_intake.resident_profile.ResidentEntity r ON cp.residentId = r.id
         LEFT JOIN ct.assignedCna u
         WHERE (CAST(:startOfDay AS java.time.OffsetDateTime) IS NULL OR ct.scheduledTime >= :startOfDay)
           AND (CAST(:endOfDay AS java.time.OffsetDateTime) IS NULL OR ct.scheduledTime < :endOfDay)
