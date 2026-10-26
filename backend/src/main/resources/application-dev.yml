@@ -12,6 +12,11 @@ spring:
       max-lifetime: ${DB_MAX_LIFETIME:1200000}
       connection-timeout: ${DB_CONNECTION_TIMEOUT:20000}
       validation-timeout: ${DB_VALIDATION_TIMEOUT:5000}
+  data:
+    redis:
+      host: ${REDIS_HOSTNAME:localhost}
+      port: ${REDIS_PORT:6380}
+
 
   jpa:
     hibernate:
