@@ -8,3 +8,6 @@
 
 # Local database backups
 backend/src/main/resources/db/*.bak
+
+# Local fixture snapshots
+backend/local-backups/
