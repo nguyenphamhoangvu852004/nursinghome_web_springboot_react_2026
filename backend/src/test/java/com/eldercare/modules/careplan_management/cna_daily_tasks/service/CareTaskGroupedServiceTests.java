@@ -3,8 +3,8 @@ package com.eldercare.modules.careplan_management.cna_daily_tasks.service;
 import com.eldercare.exception.NotFoundException;
 import com.eldercare.modules.admin.user_management.UserEntity;
 import com.eldercare.modules.admin.user_management.UserRepository;
-import com.eldercare.modules.careplan_management.careplan_design.entity.CareInterventionEntity;
-import com.eldercare.modules.careplan_management.careplan_design.repository.JpaCareInterventionRepository;
+import com.eldercare.modules.careplan_management.careplan_design.entity.v2.CareIntervention;
+import com.eldercare.modules.careplan_management.careplan_design.repository.v2.CareInterventionRepository;
 import com.eldercare.modules.careplan_management.cna_daily_tasks.dto.request.CreateTaskRequestDto;
 import com.eldercare.modules.careplan_management.cna_daily_tasks.dto.response.TaskDetailDto;
 import com.eldercare.modules.careplan_management.cna_daily_tasks.entity.CareTaskEntity;
@@ -43,7 +43,7 @@ class CareTaskGroupedServiceTests {
     private UserRepository userRepository;
 
     @Mock
-    private JpaCareInterventionRepository careInterventionRepository;
+    private CareInterventionRepository careInterventionRepository;
 
     @InjectMocks
     private CareTaskGroupedServiceImpl careTaskGroupedService;
@@ -181,8 +181,8 @@ class CareTaskGroupedServiceTests {
             CreateTaskRequestDto request = new CreateTaskRequestDto();
             request.setAssignedCnaId(null);
             
-            CareInterventionEntity intervention = new CareInterventionEntity();
-            intervention.setId(1);
+            CareIntervention intervention = new CareIntervention();
+            intervention.setId(1L);
 
             when(careInterventionRepository.findById(1L)).thenReturn(Optional.of(intervention));
             when(careTaskRepository.save(any(CareTaskEntity.class))).thenAnswer(i -> {
@@ -208,8 +208,8 @@ class CareTaskGroupedServiceTests {
             CreateTaskRequestDto request = new CreateTaskRequestDto();
             request.setAssignedCnaId(5L);
             
-            CareInterventionEntity intervention = new CareInterventionEntity();
-            intervention.setId(1);
+            CareIntervention intervention = new CareIntervention();
+            intervention.setId(1L);
 
             UserEntity cna = new UserEntity();
             cna.setId(5L);
