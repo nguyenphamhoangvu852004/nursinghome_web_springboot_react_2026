@@ -4,8 +4,8 @@ import com.eldercare.common.dto.PagedResponse;
 import com.eldercare.exception.NotFoundException;
 import com.eldercare.modules.admin.user_management.UserEntity;
 import com.eldercare.modules.admin.user_management.UserRepository;
-import com.eldercare.modules.careplan_management.careplan_design.entity.CareInterventionEntity;
-import com.eldercare.modules.careplan_management.careplan_design.repository.JpaCareInterventionRepository;
+import com.eldercare.modules.careplan_management.careplan_design.entity.v2.CareIntervention;
+import com.eldercare.modules.careplan_management.careplan_design.repository.v2.CareInterventionRepository;
 import com.eldercare.modules.careplan_management.cna_daily_tasks.dto.request.CreateTaskRequestDto;
 import com.eldercare.modules.careplan_management.cna_daily_tasks.dto.request.GroupedTaskQuery;
 import com.eldercare.modules.careplan_management.cna_daily_tasks.dto.request.TaskSearchFilter;
@@ -39,7 +39,7 @@ public class CareTaskGroupedServiceImpl implements CareTaskGroupedService {
     private final CareTaskRepository careTaskRepository;
     private final CareTaskGroupedMapper careTaskGroupedMapper;
     private final UserRepository userRepository;
-    private final JpaCareInterventionRepository careInterventionRepository;
+    private final CareInterventionRepository careInterventionRepository;
 
     @Override
     public PagedResponse<List<GroupedByCnaCard>> getTasksByCna(GroupedTaskQuery query) {
@@ -140,7 +140,7 @@ public class CareTaskGroupedServiceImpl implements CareTaskGroupedService {
     @Override
     @Transactional
     public TaskDetailDto createTask(Long interventionId, CreateTaskRequestDto request) {
-        CareInterventionEntity intervention = careInterventionRepository.findById(interventionId)
+        CareIntervention intervention = careInterventionRepository.findById(interventionId)
                 .orElseThrow(() -> new NotFoundException("CareIntervention not found with id: " + interventionId));
 
         UserEntity cna = null;
